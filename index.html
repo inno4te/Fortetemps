@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForteTemps — Template Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F6F3;
+    --surface:#FFFFFF;
+    --surface-2:#EFEDE7;
+    --line:#DEDBD2;
+    --text:#1B1A17;
+    --muted:#6B6759;
+    --accent:#6E2A35;
+    --accent-ink:#26344A;
+    --radius:8px;
+    --serif:'Source Serif 4', serif;
+    --sans:'Inter', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+
+  .app{max-width:1360px;margin:0 auto;padding:0 32px 80px;}
+  header.top{
+    padding:48px 0 30px;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+  }
+  .brand-mark{font-family:var(--serif);font-weight:600;font-size:30px;letter-spacing:-0.01em;}
+  .brand-mark span{color:var(--accent);}
+  .tag{color:var(--muted);font-size:14px;max-width:460px;line-height:1.55;margin-top:6px;}
+  .stat{font-family:var(--mono);font-size:11.5px;color:var(--muted);text-align:right;letter-spacing:0.03em;}
+  .stat b{color:var(--accent);font-weight:600;}
+
+  .controls{padding:28px 0 6px;display:flex;flex-direction:column;gap:16px;}
+  .control-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .control-label{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);width:80px;flex-shrink:0;}
+  .chip{
+    font-family:var(--sans);font-size:12.5px;padding:7px 14px;border-radius:5px;
+    background:var(--surface);border:1px solid var(--line);color:var(--muted);
+    cursor:pointer;transition:all .12s ease;white-space:nowrap;
+  }
+  .chip:hover{border-color:var(--accent);color:var(--text);}
+  .chip.active{background:var(--text);border-color:var(--text);color:#fff;font-weight:500;}
+  .chip .n{opacity:.55;margin-left:6px;font-size:10.5px;}
+
+  .results-bar{display:flex;justify-content:space-between;align-items:center;padding:20px 0 4px;color:var(--muted);font-size:12.5px;font-family:var(--mono);}
+  .results-bar span b{color:var(--text);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:18px;padding-top:18px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:border-color .15s ease, box-shadow .15s ease;}
+  .card:hover{border-color:var(--text);box-shadow:0 4px 14px rgba(20,18,14,0.08);}
+  .card-preview{padding:12px;background:var(--surface-2);}
+  .card-body{padding:13px 15px 15px;}
+  .card-theme{font-family:var(--mono);font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);}
+  .card-title{font-family:var(--serif);font-size:16.5px;margin:3px 0 3px;font-weight:600;}
+  .card-sub{font-size:12px;color:var(--muted);line-height:1.4;}
+
+  /* ================= MOCK PREVIEW SYSTEM — each style has a distinct composition ================= */
+  .mock{width:100%;aspect-ratio:4/3;border-radius:5px;overflow:hidden;position:relative;font-family:var(--sans);}
+  .m-icon{display:inline-flex;flex-shrink:0;}
+  .m-icon svg{width:100%;height:100%;display:block;}
+
+  /* ---- 1. MINIMALIST: centered single column, huge negative space ---- */
+  .mock[data-style="minimalist"]{background:#FAFAF8;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:14% 12%;}
+  .mock[data-style="minimalist"] .m-mark{font-family:var(--mono);font-size:8px;letter-spacing:0.12em;color:#B4B0A6;margin-bottom:14%;}
+  .mock[data-style="minimalist"] .m-head{width:70%;height:2px;background:#1A1A1A;margin-bottom:10%;}
+  .mock[data-style="minimalist"] .m-line1{width:82%;height:12px;background:#1A1A1A;margin-bottom:6px;}
+  .mock[data-style="minimalist"] .m-line2{width:40%;height:12px;background:#1A1A1A;margin-bottom:16%;}
+  .mock[data-style="minimalist"] .m-link{font-family:var(--mono);font-size:8px;letter-spacing:0.05em;color:var(--m-accent);text-decoration:underline;text-underline-offset:3px;}
+
+  /* ---- 2. EDITORIAL: asymmetric two-column magazine grid ---- */
+  .mock[data-style="editorial"]{background:#F6F4EE;display:grid;grid-template-columns:28% 1fr;gap:0;padding:11%;}
+  .mock[data-style="editorial"] .m-side{border-right:1px solid #D8D2C2;padding-right:8%;display:flex;flex-direction:column;gap:8px;}
+  .mock[data-style="editorial"] .m-kicker{font-family:var(--mono);font-size:7px;letter-spacing:0.1em;color:var(--m-accent);text-transform:uppercase;}
+  .mock[data-style="editorial"] .m-byline{width:70%;height:4px;background:#847C68;opacity:.5;margin-top:auto;}
+  .mock[data-style="editorial"] .m-main{padding-left:8%;display:flex;flex-direction:column;justify-content:center;}
+  .mock[data-style="editorial"] .m-dropcap{font-family:var(--serif);font-size:34px;line-height:1;float:left;margin-right:6px;color:#18160F;}
+  .mock[data-style="editorial"] .m-headline{font-family:var(--serif);font-weight:600;font-size:15px;color:#18160F;line-height:1.15;margin-bottom:8px;}
+  .mock[data-style="editorial"] .m-rule{width:100%;height:1px;background:#D8D2C2;margin-top:8px;}
+
+  /* ---- 3. BRUTALIST: overlapping raw blocks, intentional misalignment ---- */
+  .mock[data-style="brutalist"]{background:#fff;position:relative;padding:9%;}
+  .mock[data-style="brutalist"] .m-tag{position:absolute;top:8%;left:9%;font-family:var(--mono);font-size:8px;border:1.5px solid #000;padding:2px 6px;}
+  .mock[data-style="brutalist"] .m-bar1{width:78%;height:22px;background:#0A0A0A;margin-top:18%;}
+  .mock[data-style="brutalist"] .m-bar2{width:60%;height:22px;background:var(--m-accent);margin-top:6px;transform:translateX(14%);}
+  .mock[data-style="brutalist"] .m-box{position:absolute;right:9%;bottom:10%;width:26%;height:26%;border:2px solid #0A0A0A;box-shadow:5px 5px 0 #0A0A0A;background:#fff;}
+
+  /* ---- 4. GLASSMORPHISM: layered translucent panels over ambient blobs ---- */
+  .mock[data-style="glassmorphism"]{background:radial-gradient(circle at 20% 25%, var(--m-accent) 0%, transparent 40%),radial-gradient(circle at 82% 75%, var(--m-accent2) 0%, transparent 42%),linear-gradient(160deg,#EEF0F8,#DEE3F0);position:relative;}
+  .mock[data-style="glassmorphism"] .m-panel{position:absolute;background:rgba(255,255,255,0.42);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,0.65);border-radius:14px;}
+  .mock[data-style="glassmorphism"] .m-panel.p1{width:52%;height:38%;top:14%;left:10%;}
+  .mock[data-style="glassmorphism"] .m-panel.p2{width:40%;height:30%;bottom:12%;right:8%;}
+  .mock[data-style="glassmorphism"] .m-dot{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,0.7);margin:14% 0 0 14%;}
+
+  /* ---- 5. NEUMORPHISM: extruded circular dial + soft toggles ---- */
+  .mock[data-style="neumorphism"]{background:#E7E8EF;display:flex;align-items:center;justify-content:center;gap:10%;}
+  .mock[data-style="neumorphism"] .m-dial{width:34%;aspect-ratio:1;border-radius:50%;background:#E7E8EF;box-shadow:8px 8px 16px #c7c8d1,-8px -8px 16px #ffffff;position:relative;}
+  .mock[data-style="neumorphism"] .m-dial::after{content:'';position:absolute;inset:26%;border-radius:50%;box-shadow:inset 4px 4px 8px #c7c8d1, inset -4px -4px 8px #ffffff;}
+  .mock[data-style="neumorphism"] .m-togglecol{display:flex;flex-direction:column;gap:14%;}
+  .mock[data-style="neumorphism"] .m-toggle{width:44px;height:18px;border-radius:10px;background:#E7E8EF;box-shadow:4px 4px 8px #c7c8d1,-4px -4px 8px #ffffff;position:relative;}
+  .mock[data-style="neumorphism"] .m-toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--m-accent);}
+
+  /* ---- 6. DARK LUXURY: centered symmetric, single hairline ---- */
+  .mock[data-style="dark-luxury"]{background:#0F0E0C;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10%;}
+  .mock[data-style="dark-luxury"] .m-word{font-family:var(--mono);font-size:7px;letter-spacing:0.25em;color:#8A8375;margin-bottom:10%;}
+  .mock[data-style="dark-luxury"] .m-title{font-family:var(--serif);font-size:16px;color:#F2F0EA;margin-bottom:6%;}
+  .mock[data-style="dark-luxury"] .m-hr{width:22%;height:1px;background:var(--m-accent);margin-bottom:8%;}
+  .mock[data-style="dark-luxury"] .m-cta{font-family:var(--mono);font-size:7px;letter-spacing:0.1em;color:#F2F0EA;border:1px solid #4A4438;padding:6px 14px;}
+
+  /* ---- 7. BOLD MAXIMALIST: diagonal split, oversized rotated type ---- */
+  .mock[data-style="maximalist"]{position:relative;background:linear-gradient(135deg, var(--m-accent) 0 50%, var(--m-accent2) 50% 100%);overflow:hidden;}
+  .mock[data-style="maximalist"] .m-big{position:absolute;top:38%;left:-8%;width:116%;font-family:var(--serif);font-weight:700;font-size:30px;color:#fff;transform:rotate(-6deg);line-height:1;mix-blend-mode:overlay;opacity:.95;}
+  .mock[data-style="maximalist"] .m-badge{position:absolute;bottom:8%;right:8%;width:15%;aspect-ratio:1;border-radius:50%;background:#fff;}
+
+  /* ---- 8. CORPORATE: dashboard with sidebar, chart, KPI tiles ---- */
+  .mock[data-style="corporate"]{background:#F3F5F8;display:grid;grid-template-columns:16% 1fr;height:100%;}
+  .mock[data-style="corporate"] .m-sidebar{background:#0F2338;display:flex;flex-direction:column;gap:10px;padding:14% 22%;}
+  .mock[data-style="corporate"] .m-sidebar span{width:9px;height:9px;border-radius:2px;background:rgba(255,255,255,0.3);}
+  .mock[data-style="corporate"] .m-sidebar span:first-child{background:var(--m-accent);}
+  .mock[data-style="corporate"] .m-main{padding:10%;display:flex;flex-direction:column;gap:8%;}
+  .mock[data-style="corporate"] .m-kpis{display:flex;gap:6%;}
+  .mock[data-style="corporate"] .m-kpi{flex:1;background:#fff;border:1px solid #DCE3EC;border-radius:5px;height:28%;box-shadow:0 1px 3px rgba(15,35,56,0.06);}
+  .mock[data-style="corporate"] .m-chart{background:#fff;border:1px solid #DCE3EC;border-radius:5px;flex:1;position:relative;box-shadow:0 1px 3px rgba(15,35,56,0.06);}
+
+  /* ---- 9. RETRO-FUTURISTIC: converging horizon grid + chrome type ---- */
+  .mock[data-style="retro-future"]{background:linear-gradient(180deg,#160734 0%,#0E0221 55%,#0E0221 100%);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .mock[data-style="retro-future"] .m-sun{position:absolute;bottom:32%;width:34%;aspect-ratio:1;border-radius:50%;background:linear-gradient(180deg, var(--m-accent), var(--m-accent2));filter:blur(0.3px);}
+  .mock[data-style="retro-future"] .m-headline{position:relative;z-index:2;font-family:var(--serif);font-weight:700;font-size:15px;background:linear-gradient(90deg,#fff,var(--m-accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .mock[data-style="retro-future"] .m-horizon{position:absolute;bottom:0;left:0;right:0;height:42%;background-image:linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px);background-size:100% 8px;-webkit-mask-image:linear-gradient(180deg, transparent, black);mask-image:linear-gradient(180deg, transparent, black);}
+
+  /* ---- 10. HIGH-END TECHNICAL: schematic viewport with corner ticks ---- */
+  .mock[data-style="technical"]{background:#0D0F12;background-image:linear-gradient(#181B20 1px, transparent 1px),linear-gradient(90deg,#181B20 1px, transparent 1px);background-size:12px 12px;position:relative;padding:9%;}
+  .mock[data-style="technical"] .m-coord{position:absolute;top:6%;left:8%;font-family:var(--mono);font-size:6.5px;color:#5C6870;letter-spacing:0.05em;}
+  .mock[data-style="technical"] .m-viewport{position:absolute;inset:20% 16%;border:1px solid #2A343C;}
+  .mock[data-style="technical"] .m-viewport::before, .mock[data-style="technical"] .m-viewport::after{content:'';position:absolute;width:8px;height:8px;border-top:1.5px solid var(--m-accent);border-left:1.5px solid var(--m-accent);top:-1px;left:-1px;}
+  .mock[data-style="technical"] .m-viewport::after{top:auto;left:auto;bottom:-1px;right:-1px;border-top:none;border-left:none;border-bottom:1.5px solid var(--m-accent);border-right:1.5px solid var(--m-accent);}
+  .mock[data-style="technical"] .m-cross{position:absolute;top:50%;left:50%;width:14px;height:14px;transform:translate(-50%,-50%);border:1px solid #576269;border-radius:50%;}
+  .mock[data-style="technical"] .m-readout{position:absolute;bottom:6%;right:8%;font-family:var(--mono);font-size:6.5px;color:#7C8A94;}
+
+  /* ---- modal ---- */
+  .overlay{position:fixed;inset:0;background:rgba(20,18,14,0.6);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:24px;z-index:50;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--line);border-radius:12px;max-width:920px;width:100%;max-height:88vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;}
+  @media (max-width:760px){.modal{grid-template-columns:1fr;}}
+  .modal-visual{padding:26px;background:var(--surface-2);display:flex;flex-direction:column;gap:16px;}
+  .modal-visual .mock{aspect-ratio:1/1;}
+  .modal-info{padding:26px;display:flex;flex-direction:column;gap:12px;}
+  .modal-close{position:sticky;top:0;align-self:flex-end;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;}
+  .modal-close:hover{color:var(--text);}
+  .modal-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);}
+  .modal-title{font-family:var(--serif);font-size:25px;font-weight:600;margin:0;}
+  .modal-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+  .palette-row{display:flex;gap:7px;}
+  .swatch{width:28px;height:28px;border-radius:5px;border:1px solid rgba(0,0,0,0.1);}
+  .prompt-box{background:#1B1A17;border:1px solid #2C2A25;border-radius:8px;padding:15px;font-family:var(--mono);font-size:12px;line-height:1.6;color:#DCD9CF;white-space:pre-wrap;max-height:280px;overflow:auto;}
+  .copy-btn{margin-top:2px;background:var(--text);color:#fff;border:none;border-radius:6px;padding:11px 16px;font-family:var(--sans);font-weight:500;font-size:12.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;}
+  .copy-btn:hover{opacity:.85;}
+  .copy-btn.copied{background:#3D6B54;}
+
+  footer.app-footer{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;font-family:var(--mono);text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="brand-mark">Forte<span>Temps</span></div>
+      <p class="tag">A working library of site-design directions across ten industries and ten aesthetics. Pick a template, review the palette and layout logic, and copy the brief into your builder of choice.</p>
+    </div>
+    <div class="stat">100 TEMPLATES<br><b>10</b> THEMES &nbsp;×&nbsp; <b>10</b> STYLES</div>
+  </header>
+
+  <div class="controls">
+    <div class="control-row"><span class="control-label">Theme</span><div class="control-row" id="themeChips"></div></div>
+    <div class="control-row"><span class="control-label">Style</span><div class="control-row" id="styleChips"></div></div>
+  </div>
+
+  <div class="results-bar">
+    <span>Showing <b id="countLabel">100</b> templates</span>
+    <span id="filterLabel">All themes · All styles</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer class="app-footer">FORTETEMPS — DESIGN BRIEF LIBRARY — CLICK ANY TEMPLATE TO VIEW ITS FULL PROMPT</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-visual">
+      <button class="modal-close" id="closeBtn" aria-label="Close">&times;</button>
+      <div id="modalMockWrap"></div>
+      <div class="palette-row" id="modalPalette"></div>
+    </div>
+    <div class="modal-info">
+      <div class="modal-eyebrow" id="modalEyebrow"></div>
+      <h3 class="modal-title" id="modalTitle"></h3>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="prompt-box" id="modalPrompt"></div>
+      <button class="copy-btn" id="copyBtn">Copy prompt to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================ DATA ============================ */
+
+const STYLES = [
+  {
+    id:'minimalist', name:'Minimalist',
+    bg:'#FAFAF8', surface:'#FFFFFF', text:'#1A1A1A', muted:'#9A9690',
+    display:'Söhne (or Inter, light weights)', body:'Inter',
+    layout:'Single centered column with wide margins on every side. No cards, no grid lines, no drop shadows. One thin 2px rule separates the wordmark from the headline. Corner radii stay at 0.',
+    signature:'One short headline set at a large size against mostly empty space, with a single underlined text link in place of a button.',
+    note:'Works best when the product or offer can be stated in under eight words — the layout gives it nowhere to hide.'
+  },
+  {
+    id:'editorial', name:'Editorial / Magazine',
+    bg:'#F6F4EE', surface:'#FFFFFF', text:'#18160F', muted:'#847C68',
+    display:'Source Serif 4 or Freight Text', body:'Inter',
+    layout:'Two-column asymmetric grid — a narrow left rail holding a kicker and byline, a wider right column carrying a serif headline with a dropped capital. Hairline rules separate sections instead of shadows or cards.',
+    signature:'A dropped capital on the opening paragraph and a kicker line above the headline, the way a print feature would be laid out.',
+    note:'Best suited to brands with a real point of view to publish, not just a product to sell.'
+  },
+  {
+    id:'brutalist', name:'Brutalist',
+    bg:'#FFFFFF', surface:'#FFFFFF', text:'#0A0A0A', muted:'#0A0A0A',
+    display:'Suisse Int\'l Mono or Space Grotesk, bold', body:'IBM Plex Mono',
+    layout:'Stacked, slightly overlapping blocks with 2px black borders and hard offset shadows (no blur). Elements are placed with deliberate misalignment rather than a tidy grid. Zero corner radius throughout.',
+    signature:'A bordered box overlapping a solid color bar, offset just enough to read as intentional rather than broken.',
+    note:'Needs confident copy — the layout has no soft edges to hide behind.'
+  },
+  {
+    id:'glassmorphism', name:'Glassmorphism',
+    bg:'#EDEFF7', surface:'rgba(255,255,255,0.5)', text:'#101423', muted:'#586178',
+    display:'General Sans, semibold', body:'Inter',
+    layout:'Two frosted panels at different depths, floating over a soft ambient-gradient backdrop. 14px radii, 1px light borders, no hard shadows — depth comes from blur and layering only.',
+    signature:'Panels that overlap just enough to show the blur working — content should never feel like it is floating for no reason.',
+    note:'Keep the background gradient restrained; the effect reads as expensive only when there is real contrast for the blur to catch.'
+  },
+  {
+    id:'neumorphism', name:'Neumorphism',
+    bg:'#E7E8EF', surface:'#E7E8EF', text:'#33354A', muted:'#8385A0',
+    display:'Poppins, medium', body:'Inter',
+    layout:'Monochrome surface where controls are pressed or extruded using dual soft shadows (light source top-left). No borders, no color blocking — the accent color appears only on active states.',
+    signature:'A dial or switch that looks physically molded into the same-color surface rather than sitting on top of it.',
+    note:'Best for controls-heavy interfaces — settings, dashboards, hardware companions — rather than content-heavy marketing pages.'
+  },
+  {
+    id:'dark-luxury', name:'Dark Mode Luxury',
+    bg:'#0F0E0C', surface:'#171613', text:'#F2F0EA', muted:'#7A7568',
+    display:'Source Serif 4, or a fashion-house serif', body:'Inter',
+    layout:'Centered, symmetric composition on a near-black field. A single hairline rule under the headline, small-caps label above it, generous margin on all sides. Buttons are outlined, never filled.',
+    signature:'One hairline rule doing all the separating work — no cards, no shadows, no gradients beyond the accent color itself.',
+    note:'The restraint is the point: one accent color, used once, communicates more than five.'
+  },
+  {
+    id:'maximalist', name:'Bold Maximalist',
+    bg:'#FFFFFF', surface:'#FFFFFF', text:'#101010', muted:'#2B2B2B',
+    display:'Source Serif 4, heavy weight, or Clash Display', body:'Inter',
+    layout:'A diagonal two-color split fills the frame; oversized type crosses the seam at a slight rotation and bleeds off both edges. No grid — the diagonal is the only structural line.',
+    signature:'Type set large enough to break the frame, rotated a few degrees so it reads as a deliberate collage rather than a mistake.',
+    note:'Use one diagonal, one rotation, one oversized element — stacking more than one bold move at a time reads as noisy rather than confident.'
+  },
+  {
+    id:'corporate', name:'Corporate Professional',
+    bg:'#F3F5F8', surface:'#FFFFFF', text:'#0F2338', muted:'#5A6D82',
+    display:'IBM Plex Sans, semibold', body:'IBM Plex Sans',
+    layout:'Fixed sidebar plus content grid, styled like an internal tool rather than a marketing page. KPI tiles and a chart module sit above the fold, each on an 8px-radius card with a soft ambient shadow.',
+    signature:'A real-looking metrics panel — chart plus two or three KPI numbers — placed where a hero image would normally go.',
+    note:'Credible because it looks operational, not decorative. Avoid stock illustration here entirely.'
+  },
+  {
+    id:'retro-future', name:'Retro-Futuristic',
+    bg:'#0E0221', surface:'#1B0B3A', text:'#EDE6FF', muted:'#9C8FD6',
+    display:'Eurostile or Michroma', body:'Space Grotesk',
+    layout:'A deep violet gradient field with a glowing horizon-line grid receding at the base, and a gradient-filled sun or arc sitting on the horizon. Headline type uses a chrome or gradient fill, used once.',
+    signature:'The horizon grid and gradient arc together, not separately — either alone reads as a generic dark hero.',
+    note:'Keep the neon to one hue plus one gradient. A second accent color turns this from retro-futurism into a rave flyer.'
+  },
+  {
+    id:'technical', name:'High-End Technical',
+    bg:'#0D0F12', surface:'#14171C', text:'#E7ECEF', muted:'#6E7C86',
+    display:'Inter for headlines, IBM Plex Mono for all labels', body:'Inter',
+    layout:'A faint background grid with a bordered "viewport" panel marked by corner brackets, coordinate-style labels in the corners, and small monospace readouts near key numbers — like an instrument panel, not a poster.',
+    signature:'Corner brackets and coordinate labels used as real information (version numbers, timestamps, specs), never as decoration alone.',
+    note:'Every mono label should say something true and specific — a fake coordinate reads as costume, a real spec reads as competence.'
+  }
+];
+
+const THEMES = [
+  {id:'saas', name:'SaaS & Tech', mark:'SYS', accent:'#4F46E5', accent2:'#14B8A6',
+    industry:'a B2B software platform', audience:'technical buyers and engineering teams',
+    sections:'a live product demo panel, feature grid, integrations marquee, tiered pricing table, and customer-logo strip',
+    iconSvg:'<path d="M8 6 3 12l5 6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 6l5 6-5 6" stroke-linecap="round" stroke-linejoin="round"/>'},
+  {id:'luxury-ecom', name:'Luxury E-Commerce', mark:'LUX', accent:'#9C7A3C', accent2:'#7A1F2B',
+    industry:'a high-end fashion or goods label', audience:'discerning retail customers',
+    sections:'a full-bleed lookbook hero, shoppable product grid, a craftsmanship/heritage story, a size & fit guide, and a members-only program teaser',
+    iconSvg:'<path d="M4 9h16l-8 12L4 9z" stroke-linejoin="round"/><path d="M4 9l4-6h8l4 6" stroke-linejoin="round"/>'},
+  {id:'real-estate', name:'Real Estate', mark:'RE', accent:'#2F5233', accent2:'#B8934A',
+    industry:'a boutique real estate brokerage', audience:'home buyers and investors',
+    sections:'a featured-listings carousel, an interactive neighborhood map, agent profile cards, a virtual-tour call-to-action, and a mortgage calculator',
+    iconSvg:'<path d="M3 11l9-7 9 7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10h14V10" stroke-linejoin="round"/>'},
+  {id:'restaurant', name:'Restaurant & Hospitality', mark:'R&H', accent:'#8C3A2E', accent2:'#4B5E3A',
+    industry:'a chef-driven restaurant', audience:'diners and event planners',
+    sections:'menu highlights with pricing, a chef/founder story, a reservation widget, a photo gallery of dishes and space, and a private-events section',
+    iconSvg:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2" stroke-linecap="round" stroke-linejoin="round"/>'},
+  {id:'agency', name:'Creative Agency & Portfolio', mark:'AG', accent:'#D6491F', accent2:'#101820',
+    industry:'an independent design or branding studio', audience:'prospective enterprise clients',
+    sections:'a case-study grid, a process timeline, a client roster, a studio-culture strip, and a short project-inquiry brief',
+    iconSvg:'<circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/>'},
+  {id:'fintech', name:'Fintech & Banking', mark:'FIN', accent:'#1B3F73', accent2:'#1E9E63',
+    industry:'a digital banking or investing product', audience:'retail and SMB customers',
+    sections:'an account/dashboard preview, security and compliance badges, a rate or fee comparison table, an app-download panel, and a regulatory footer',
+    iconSvg:'<path d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h6v6" stroke-linecap="round" stroke-linejoin="round"/>'},
+  {id:'wellness', name:'Health & Wellness', mark:'HW', accent:'#3E7C6B', accent2:'#C9905A',
+    industry:'a wellness studio or clinic', audience:'clients seeking care or membership',
+    sections:'a program overview, practitioner bios, a testimonial carousel, an online booking flow, and membership tiers',
+    iconSvg:'<path d="M4 20C4 10 12 4 20 4c0 8-6 16-16 16z" stroke-linejoin="round"/><path d="M4 20L14 10" stroke-linecap="round"/>'},
+  {id:'education', name:'Education & Learning', mark:'EDU', accent:'#1D4E89', accent2:'#D2932E',
+    industry:'an online course or cohort-based school', audience:'prospective students',
+    sections:'a course catalog, an instructor spotlight, a curriculum roadmap, student outcome stats, and an enrollment call-to-action',
+    iconSvg:'<path d="M2 9l10-5 10 5-10 5-10-5z" stroke-linejoin="round"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5" stroke-linejoin="round"/>'},
+  {id:'nonprofit', name:'Nonprofit & Cause', mark:'NP', accent:'#6B4226', accent2:'#B99A6B',
+    industry:'a mission-driven nonprofit', audience:'donors and volunteers',
+    sections:'a mission statement, quantified impact statistics, donor/beneficiary stories, a volunteer sign-up, and a transparency/financials report',
+    iconSvg:'<path d="M12 20s-7-4.5-9.5-9C1 7.5 3 4 6.5 4 9 4 11 6 12 7c1-1 3-3 5.5-3C21 4 23 7.5 21.5 11 19 15.5 12 20 12 20z" stroke-linejoin="round"/>'},
+  {id:'travel', name:'Travel & Boutique Hotel', mark:'TRV', accent:'#1C6E8C', accent2:'#D89B2E',
+    industry:'a boutique hotel or travel outfitter', audience:'travelers planning a stay or trip',
+    sections:'a destination hero, room or package categories, curated experience add-ons, guest reviews, and a live booking calendar',
+    iconSvg:'<circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6 6-2z" stroke-linejoin="round"/>'}
+];
+
+/* ============================ BUILD TEMPLATES ============================ */
+
+function buildPrompt(theme, style){
+  return `Design a ${style.name.toLowerCase()} website for ${theme.industry}, aimed at ${theme.audience}.
+
+COLOR PALETTE
+- Background: ${style.bg}
+- Surface/cards: ${style.surface}
+- Primary text: ${style.text}
+- Muted/secondary text: ${style.muted}
+- Primary accent: ${theme.accent}
+- Secondary accent: ${theme.accent2}
+
+TYPOGRAPHY
+- Display/headline face: ${style.display}
+- Body/UI face: ${style.body}
+
+LAYOUT & SYSTEM
+${style.layout}
+
+SIGNATURE ELEMENT
+${style.signature} Build this around ${theme.industry}'s actual offering, not a placeholder.
+
+REQUIRED SECTIONS
+${theme.sections}.
+
+DESIGN NOTE
+${style.note}`;
+}
+
+const TEMPLATES = [];
+THEMES.forEach(theme=>{
+  STYLES.forEach(style=>{
+    TEMPLATES.push({
+      id: theme.id + '__' + style.id,
+      theme, style,
+      title: theme.name + ' — ' + style.name,
+      prompt: buildPrompt(theme, style)
+    });
+  });
+});
+
+/* ============================ MOCK RENDER (distinct composition per style) ============================ */
+
+function icon(theme, size, color){
+  return `<span class="m-icon" style="width:${size}px;height:${size}px;color:${color||theme.accent}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">${theme.iconSvg}</svg></span>`;
+}
+
+function mockHTML(theme, style){
+  const idx = THEMES.findIndex(t=>t.id===theme.id);
+  const flip = idx % 2 === 1;
+  const group3 = idx % 3;                 // 0,1,2 — used for size/position variants
+  const rotArr = [-8,6,-5,9,-3,7,-9,4,-6,8];
+  const rot = rotArr[idx];
+  const vars = `--m-accent:${theme.accent};--m-accent2:${theme.accent2}`;
+
+  switch(style.id){
+
+    case 'minimalist': {
+      const align = flip ? 'flex-end' : 'flex-start';
+      const textAlign = flip ? 'right' : 'left';
+      return `<div class="mock" data-style="minimalist" style="${vars};align-items:${align};text-align:${textAlign}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:14%;flex-direction:${flip?'row-reverse':'row'}">${icon(theme,11)}<span class="m-mark">${theme.mark}</span></div>
+        <div class="m-head"></div>
+        <div class="m-line1"></div><div class="m-line2" style="${flip?'margin-left:auto':''}"></div>
+        <div class="m-link">Enter site →</div>
+      </div>`;
+    }
+
+    case 'editorial': {
+      const cols = flip ? '1fr 28%' : '28% 1fr';
+      return `<div class="mock" data-style="editorial" style="${vars};grid-template-columns:${cols}">
+        ${flip ? `
+        <div class="m-main" style="padding-left:0;padding-right:8%;border-right:1px solid #D8D2C2"><div class="m-dropcap">${theme.name[0]}</div><div class="m-headline">A considered introduction, set like a feature story.</div><div class="m-rule"></div></div>
+        <div class="m-side" style="border-right:none;padding-right:0;padding-left:8%"><div class="m-kicker" style="display:flex;align-items:center;gap:5px">${icon(theme,10)}${theme.mark}</div><div class="m-byline"></div></div>
+        ` : `
+        <div class="m-side"><div class="m-kicker" style="display:flex;align-items:center;gap:5px">${icon(theme,10)}${theme.mark}</div><div class="m-byline"></div></div>
+        <div class="m-main"><div class="m-dropcap">${theme.name[0]}</div><div class="m-headline">A considered introduction, set like a feature story.</div><div class="m-rule"></div></div>
+        `}
+      </div>`;
+    }
+
+    case 'brutalist': {
+      const dir = flip ? -1 : 1;
+      return `<div class="mock" data-style="brutalist" style="${vars}">
+        <div class="m-tag">${theme.mark}·${String(idx+1).padStart(2,'0')}</div>
+        <div class="m-bar1"></div>
+        <div class="m-bar2" style="transform:translateX(${14*dir}%)"></div>
+        <div class="m-box" style="${flip?'left:9%;right:auto':''}">${icon(theme,16,'#0A0A0A')}</div>
+      </div>`;
+    }
+
+    case 'glassmorphism': {
+      const p1 = flip ? 'top:12%;right:10%;left:auto' : 'top:14%;left:10%';
+      const p2 = flip ? 'bottom:12%;left:8%;right:auto' : 'bottom:12%;right:8%';
+      return `<div class="mock" data-style="glassmorphism" style="${vars}">
+        <div class="m-panel p1" style="${p1}"><div class="m-dot" style="display:flex;align-items:center;justify-content:center">${icon(theme,10,'#33405C')}</div></div>
+        <div class="m-panel p2" style="${p2}"></div>
+      </div>`;
+    }
+
+    case 'neumorphism': {
+      const justify = flip ? 'flex-end' : 'flex-start';
+      return `<div class="mock" data-style="neumorphism" style="${vars};justify-content:center">
+        <div style="display:flex;align-items:center;gap:10%;width:100%;justify-content:${flip?'flex-end':'flex-start'};padding:0 10%">
+          ${flip ? `<div class="m-togglecol"><div class="m-toggle"></div><div class="m-toggle"></div></div><div class="m-dial" style="display:flex;align-items:center;justify-content:center">${icon(theme,14,theme.accent)}</div>`
+                 : `<div class="m-dial" style="display:flex;align-items:center;justify-content:center">${icon(theme,14,theme.accent)}</div><div class="m-togglecol"><div class="m-toggle"></div><div class="m-toggle"></div></div>`}
+        </div>
+      </div>`;
+    }
+
+    case 'dark-luxury': {
+      const ruleWidth = [18,24,30][group3];
+      return `<div class="mock" data-style="dark-luxury" style="${vars}">
+        <div style="margin-bottom:8%">${icon(theme,14,'#8A8375')}</div>
+        <div class="m-word">${theme.mark}</div>
+        <div class="m-title">A quieter kind of statement</div>
+        <div class="m-hr" style="width:${ruleWidth}%"></div>
+        <div class="m-cta">DISCOVER</div>
+      </div>`;
+    }
+
+    case 'maximalist': {
+      const angle = flip ? '225deg' : '135deg';
+      const badgePos = flip ? 'left:8%;right:auto' : 'right:8%;left:auto';
+      return `<div class="mock" data-style="maximalist" style="${vars};background:linear-gradient(${angle}, var(--m-accent) 0 50%, var(--m-accent2) 50% 100%)">
+        <div class="m-big" style="transform:rotate(${rot}deg)">${theme.mark}</div>
+        <div class="m-badge" style="${badgePos};display:flex;align-items:center;justify-content:center">${icon(theme,14,theme.accent)}</div>
+      </div>`;
+    }
+
+    case 'corporate': {
+      const cols = flip ? '1fr 16%' : '16% 1fr';
+      return `<div class="mock" data-style="corporate" style="${vars};grid-template-columns:${cols}">
+        ${flip ? `
+        <div class="m-main">${cornerKpis(theme)}</div>
+        <div class="m-sidebar" style="align-items:center">${icon(theme,12,'#fff')}<span></span><span></span><span></span></div>
+        ` : `
+        <div class="m-sidebar" style="align-items:center">${icon(theme,12,'#fff')}<span></span><span></span><span></span></div>
+        <div class="m-main">${cornerKpis(theme)}</div>
+        `}
+      </div>`;
+    }
+
+    case 'retro-future': {
+      const sunPos = ['left:20%','left:50%;transform:translateX(-50%)','right:20%'][group3];
+      return `<div class="mock" data-style="retro-future" style="${vars}">
+        <div class="m-sun" style="${sunPos};display:flex;align-items:center;justify-content:center;opacity:0.9">${icon(theme,14,'rgba(255,255,255,0.75)')}</div>
+        <div class="m-headline">${theme.mark}</div>
+        <div class="m-horizon"></div>
+      </div>`;
+    }
+
+    case 'technical': {
+      const vp = flip ? 'inset:16% 20% 24% 12%' : 'inset:20% 16%';
+      return `<div class="mock" data-style="technical" style="${vars}">
+        <div class="m-coord" style="display:flex;align-items:center;gap:4px">${icon(theme,9,'#5C6870')} ${theme.mark}/OK · 41.02N</div>
+        <div class="m-viewport" style="${vp}"><div class="m-cross"></div></div>
+        <div class="m-readout">REV ${idx+1}.${group3}</div>
+      </div>`;
+    }
+
+    default: return `<div class="mock"></div>`;
+  }
+}
+
+function cornerKpis(theme){
+  return `<div class="m-kpis"><div class="m-kpi" style="display:flex;align-items:center;justify-content:center">${icon(theme,12)}</div><div class="m-kpi"></div><div class="m-kpi"></div></div><div class="m-chart"></div>`;
+}
+
+/* ============================ RENDER ============================ */
+
+const grid = document.getElementById('grid');
+const themeChips = document.getElementById('themeChips');
+const styleChips = document.getElementById('styleChips');
+const countLabel = document.getElementById('countLabel');
+const filterLabel = document.getElementById('filterLabel');
+
+let activeTheme = 'all';
+let activeStyle = 'all';
+
+function renderChips(){
+  themeChips.innerHTML = '<button class="chip active" data-val="all">All<span class="n">100</span></button>' +
+    THEMES.map(t=>`<button class="chip" data-val="${t.id}">${t.name}<span class="n">10</span></button>`).join('');
+  styleChips.innerHTML = '<button class="chip active" data-val="all">All<span class="n">100</span></button>' +
+    STYLES.map(s=>`<button class="chip" data-val="${s.id}">${s.name}<span class="n">10</span></button>`).join('');
+
+  themeChips.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      activeTheme = btn.dataset.val;
+      themeChips.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active', b===btn));
+      renderGrid();
+    });
+  });
+  styleChips.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      activeStyle = btn.dataset.val;
+      styleChips.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active', b===btn));
+      renderGrid();
+    });
+  });
+}
+
+function renderGrid(){
+  const filtered = TEMPLATES.filter(t=>
+    (activeTheme==='all' || t.theme.id===activeTheme) &&
+    (activeStyle==='all' || t.style.id===activeStyle)
+  );
+  countLabel.textContent = filtered.length;
+  const themeName = activeTheme==='all' ? 'All themes' : THEMES.find(t=>t.id===activeTheme).name;
+  const styleName = activeStyle==='all' ? 'All styles' : STYLES.find(s=>s.id===activeStyle).name;
+  filterLabel.textContent = themeName + ' · ' + styleName;
+
+  grid.innerHTML = filtered.map(t=>`
+    <div class="card" data-id="${t.id}">
+      <div class="card-preview">${mockHTML(t.theme, t.style)}</div>
+      <div class="card-body">
+        <div class="card-theme">${t.theme.name}</div>
+        <div class="card-title">${t.style.name}</div>
+        <div class="card-sub">${t.style.layout.split('.')[0]}.</div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click', ()=> openModal(card.dataset.id));
+  });
+}
+
+/* ============================ MODAL ============================ */
+
+const overlay = document.getElementById('overlay');
+const modalMockWrap = document.getElementById('modalMockWrap');
+const modalPalette = document.getElementById('modalPalette');
+const modalEyebrow = document.getElementById('modalEyebrow');
+const modalTitle = document.getElementById('modalTitle');
+const modalDesc = document.getElementById('modalDesc');
+const modalPrompt = document.getElementById('modalPrompt');
+const copyBtn = document.getElementById('copyBtn');
+
+function openModal(id){
+  const t = TEMPLATES.find(x=>x.id===id);
+  if(!t) return;
+  modalMockWrap.innerHTML = mockHTML(t.theme, t.style);
+
+  modalPalette.innerHTML = [t.style.bg, t.style.surface, t.style.text, t.theme.accent, t.theme.accent2]
+    .map(c=>`<div class="swatch" style="background:${c}" title="${c}"></div>`).join('');
+
+  modalEyebrow.textContent = t.theme.name + ' · Template';
+  modalTitle.textContent = t.style.name;
+  modalDesc.textContent = t.style.note;
+  modalPrompt.textContent = t.prompt;
+  copyBtn.classList.remove('copied');
+  copyBtn.textContent = 'Copy prompt to clipboard';
+  copyBtn.onclick = ()=>{
+    navigator.clipboard.writeText(t.prompt).then(()=>{
+      copyBtn.textContent = 'Copied ✓';
+      copyBtn.classList.add('copied');
+      setTimeout(()=>{ copyBtn.textContent='Copy prompt to clipboard'; copyBtn.classList.remove('copied'); }, 1800);
+    });
+  };
+
+  overlay.classList.add('open');
+}
+
+document.getElementById('closeBtn').addEventListener('click', ()=> overlay.classList.remove('open'));
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.classList.remove('open'); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') overlay.classList.remove('open'); });
+
+renderChips();
+renderGrid();
+</script>
+</body>
+</html>
